@@ -1,8 +1,7 @@
-use proc_macro2::{Span, TokenStream};
-use quote::{quote, quote_spanned, ToTokens};
+use proc_macro2::TokenStream;
+use quote::{quote, ToTokens};
 use syn::buffer::Cursor;
 use syn::parse::{Parse, ParseStream, Result};
-use syn::spanned::Spanned;
 use syn::Lit;
 
 use super::ToNodeIterator;
@@ -57,7 +56,7 @@ impl ToTokens for HtmlNode {
         tokens.extend(match &self {
             HtmlNode::Literal(lit) => {
                 let sr = lit.stringify();
-                quote_spanned! {lit.span()=> ::yew::virtual_dom::VText::new(#sr) }
+                quote! { ::yew::virtual_dom::VText::new(#sr) }
             }
             HtmlNode::Expression(expr) => quote! {#expr},
         });
@@ -70,7 +69,7 @@ impl ToNodeIterator for HtmlNode {
             Self::Literal(_) => None,
             Self::Expression(expr) => {
                 // NodeSeq turns both Into<T> and Vec<Into<T>> into IntoIterator<Item = T>
-                Some(quote_spanned! {expr.span().resolved_at(Span::call_site())=>
+                Some(quote! {
                     ::std::convert::Into::<::yew::utils::NodeSeq<_, _>>::into(#expr)
                 })
             }

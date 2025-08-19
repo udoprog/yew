@@ -8,9 +8,9 @@ use syn::punctuated::{Pair, Punctuated};
 use syn::spanned::Spanned;
 use syn::visit_mut::VisitMut;
 use syn::{
-    parse_quote, parse_quote_spanned, visit_mut, FnArg, GenericParam, Ident, Lifetime,
-    LifetimeParam, Pat, Receiver, ReturnType, Signature, Type, TypeImplTrait, TypeParam,
-    TypeParamBound, TypeReference, WherePredicate,
+    parse_quote, visit_mut, FnArg, GenericParam, Ident, Lifetime, LifetimeParam, Pat, Receiver,
+    ReturnType, Signature, Type, TypeImplTrait, TypeParam, TypeParamBound, TypeReference,
+    WherePredicate,
 };
 
 use super::lifetime;
@@ -72,8 +72,8 @@ impl HookSignature {
                         let return_type_ref = Type::Reference(return_type_ref);
 
                         return (
-                            parse_quote_spanned! {
-                                return_type.span() => #arrow impl #bound ::yew::functional::Hook<Output = #return_type_ref>
+                            parse_quote! {
+                                #arrow impl #bound ::yew::functional::Hook<Output = #return_type_ref>
                             },
                             return_type_ref,
                         );
@@ -81,8 +81,8 @@ impl HookSignature {
                 }
 
                 (
-                    parse_quote_spanned! {
-                        return_type.span() => #arrow impl #bound ::yew::functional::Hook<Output = #return_type>
+                    parse_quote! {
+                        #arrow impl #bound ::yew::functional::Hook<Output = #return_type>
                     },
                     *return_type.clone(),
                 )

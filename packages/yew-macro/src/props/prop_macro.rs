@@ -1,10 +1,9 @@
 use std::convert::TryInto;
 
 use proc_macro2::TokenStream;
-use quote::{quote_spanned, ToTokens};
+use quote::{quote, ToTokens};
 use syn::parse::{Parse, ParseStream};
 use syn::punctuated::Punctuated;
-use syn::spanned::Spanned;
 use syn::token::Brace;
 use syn::{Expr, Token, TypePath};
 
@@ -83,7 +82,7 @@ impl Parse for PropsExpr {
         if ty.qself.is_none() && is_associated_properties(&ty) {
             pop_last_punctuated(&mut ty.path.segments);
             // .. transform it into a "qualified-self" type
-            ty = syn::parse2(quote_spanned! {ty.span()=>
+            ty = syn::parse2(quote! {
                 <#ty as ::yew::html::Component>::Properties
             })?;
         }

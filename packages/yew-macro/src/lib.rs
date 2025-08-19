@@ -46,6 +46,10 @@
 //!
 //! Please refer to [https://github.com/yewstack/yew](https://github.com/yewstack/yew) for how to set this up.
 
+// TODO: due to removing and an attempt to keep the code as intact as possible
+// this attribute is present.
+#![allow(unused)]
+
 mod classes;
 mod derive_props;
 mod function_component;

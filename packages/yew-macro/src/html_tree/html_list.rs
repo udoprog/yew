@@ -1,4 +1,4 @@
-use quote::{quote, quote_spanned, ToTokens};
+use quote::{quote, ToTokens};
 use syn::buffer::Cursor;
 use syn::parse::{Parse, ParseStream};
 use syn::spanned::Spanned;
@@ -66,7 +66,7 @@ impl ToTokens for HtmlList {
         } = &self;
 
         let key = if let Some(key) = &open.props.key {
-            quote_spanned! {key.span()=> ::std::option::Option::Some(::std::convert::Into::<::yew::virtual_dom::Key>::into(#key))}
+            quote! {::std::option::Option::Some(::std::convert::Into::<::yew::virtual_dom::Key>::into(#key))}
         } else {
             quote! { ::std::option::Option::None }
         };
@@ -79,13 +79,13 @@ impl ToTokens for HtmlList {
         .span();
 
         tokens.extend(match children.fully_keyed() {
-            Some(true) => quote_spanned!{span=>
+            Some(true) => quote!{
                 ::yew::virtual_dom::VList::__macro_new(#children, #key, ::yew::virtual_dom::FullyKeyedState::KnownFullyKeyed)
             },
-            Some(false) => quote_spanned!{span=>
+            Some(false) => quote!{
                 ::yew::virtual_dom::VList::__macro_new(#children, #key, ::yew::virtual_dom::FullyKeyedState::KnownMissingKeys)
             },
-            None => quote_spanned!{span=>
+            None => quote!{
                 ::yew::virtual_dom::VList::with_children(#children, #key)
             }
         });

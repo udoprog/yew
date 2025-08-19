@@ -1,14 +1,13 @@
 use std::borrow::Cow;
 use std::mem::size_of;
 
-use proc_macro2::{Span, TokenStream};
-use quote::{quote_spanned, ToTokens};
-use syn::spanned::Spanned;
+use proc_macro2::TokenStream;
+use quote::{quote, ToTokens};
 use syn::{Expr, Lit, LitStr};
 
 /// Stringify a value at runtime.
 fn stringify_at_runtime(src: impl ToTokens) -> TokenStream {
-    quote_spanned! {src.span().resolved_at(Span::call_site())=>
+    quote! {
         ::std::convert::Into::<::yew::virtual_dom::AttrValue>::into(#src)
     }
 }
@@ -73,7 +72,7 @@ impl Stringify for LitStr {
     }
 
     fn stringify(&self) -> TokenStream {
-        quote_spanned! {self.span()=>
+        quote! {
             ::yew::virtual_dom::AttrValue::Static(#self)
         }
     }

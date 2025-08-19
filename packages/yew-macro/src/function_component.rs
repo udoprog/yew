@@ -4,8 +4,8 @@ use syn::parse::{Parse, ParseStream};
 use syn::punctuated::Punctuated;
 use syn::token::{Comma, Fn};
 use syn::{
-    parse_quote, parse_quote_spanned, visit_mut, Attribute, Block, FnArg, Generics, Ident, Item,
-    ItemFn, LitStr, ReturnType, Type, Visibility,
+    parse_quote, visit_mut, Attribute, Block, FnArg, Generics, Ident, Item, ItemFn, LitStr,
+    ReturnType, Type, Visibility,
 };
 
 use crate::hook::BodyRewriter;
@@ -226,7 +226,7 @@ impl FunctionComponent {
         let where_clause = generics.make_where_clause();
         for ty_generic in self.generics.type_params() {
             let ident = &ty_generic.ident;
-            let bound = parse_quote_spanned! { ident.span() =>
+            let bound = parse_quote! {
                 #ident: 'static
             };
 

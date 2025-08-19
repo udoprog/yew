@@ -1,8 +1,7 @@
 use proc_macro2::TokenStream;
-use quote::{quote_spanned, ToTokens};
+use quote::{quote, ToTokens};
 use syn::buffer::Cursor;
 use syn::parse::{Parse, ParseStream};
-use syn::spanned::Spanned;
 use syn::{Expr, Token};
 
 use super::ToNodeIterator;
@@ -40,7 +39,7 @@ impl Parse for HtmlIterable {
 impl ToTokens for HtmlIterable {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let expr = &self.0;
-        let new_tokens = quote_spanned! {expr.span()=>
+        let new_tokens = quote! {
             #[allow(unused_braces)]
             ::std::iter::Iterator::collect::<::yew::virtual_dom::VNode>(::std::iter::IntoIterator::into_iter(#expr))
         };
@@ -54,7 +53,7 @@ impl ToNodeIterator for HtmlIterable {
         let Self(expr) = self;
         // #expr can return anything that implements IntoIterator<Item=Into<T>>
         // We use a util method to avoid clippy warnings and reduce generated code size
-        Some(quote_spanned! {expr.span()=>
+        Some(quote! {
             ::yew::utils::into_node_iter(#expr)
         })
     }

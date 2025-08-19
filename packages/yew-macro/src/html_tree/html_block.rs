@@ -1,5 +1,5 @@
 use proc_macro2::Delimiter;
-use quote::{quote, quote_spanned, ToTokens};
+use quote::{quote, ToTokens};
 use syn::buffer::Cursor;
 use syn::parse::{Parse, ParseStream};
 use syn::{braced, token};
@@ -57,7 +57,7 @@ impl ToNodeIterator for HtmlBlock {
             BlockContent::Node(node) => node.to_node_iterator_stream(),
         }?;
 
-        Some(quote_spanned! {brace.span=> #new_tokens})
+        Some(quote! {#new_tokens})
     }
 
     fn is_singular(&self) -> bool {

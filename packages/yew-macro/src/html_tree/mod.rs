@@ -1,9 +1,8 @@
 use proc_macro2::{Delimiter, Ident, Span, TokenStream};
-use quote::{quote, quote_spanned, ToTokens};
+use quote::{quote, ToTokens};
 use syn::buffer::Cursor;
 use syn::ext::IdentExt;
 use syn::parse::{Parse, ParseStream};
-use syn::spanned::Spanned;
 use syn::{braced, token, Token};
 
 use crate::{is_ide_completion, PeekValue};
@@ -184,12 +183,10 @@ impl Parse for HtmlRootVNode {
 impl ToTokens for HtmlRootVNode {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let new_tokens = self.0.to_token_stream();
-        tokens.extend(
-            quote_spanned! {self.0.span().resolved_at(Span::mixed_site())=> {
-                #[allow(clippy::useless_conversion)]
-                <::yew::virtual_dom::VNode as ::std::convert::From<_>>::from(#new_tokens)
-            }},
-        );
+        tokens.extend(quote! {{
+            #[allow(clippy::useless_conversion)]
+            <::yew::virtual_dom::VNode as ::std::convert::From<_>>::from(#new_tokens)
+        }});
     }
 }
 
@@ -253,7 +250,7 @@ impl HtmlChildrenTree {
             // html).
             let children_into = children
                 .iter()
-                .map(|child| quote_spanned! {child.span()=> ::std::convert::Into::into(#child) });
+                .map(|child| quote! { ::std::convert::Into::into(#child) });
             return quote! {
                 [#(#children_into),*].to_vec()
             };
@@ -266,7 +263,7 @@ impl HtmlChildrenTree {
                     ::std::iter::Extend::extend(&mut #vec_ident, #node_iterator_stream);
                 }
             } else {
-                quote_spanned! {child.span()=>
+                quote! {
                     #vec_ident.push(::std::convert::Into::into(#child));
                 }
             }
@@ -414,9 +411,9 @@ impl Parse for HtmlRootBraced {
 
 impl ToTokens for HtmlRootBraced {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let Self { brace, children } = self;
+        let Self { children, .. } = self;
 
-        tokens.extend(quote_spanned! {brace.span.span()=>
+        tokens.extend(quote! {
             {
                 ::yew::virtual_dom::VNode::VList(::std::rc::Rc::new(
                     ::yew::virtual_dom::VList::with_children(#children, ::std::option::Option::None)

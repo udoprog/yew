@@ -7,7 +7,7 @@
 
 use proc_macro2::{Ident, Span};
 use quote::{format_ident, quote, ToTokens};
-use syn::{parse_quote_spanned, Attribute, GenericParam};
+use syn::{parse_quote, Attribute, GenericParam};
 
 use super::generics::to_arguments;
 use super::DerivePropsInput;
@@ -99,7 +99,7 @@ impl PropsBuilder<'_> {
         let generic_args = to_arguments(generics);
 
         let mut assert_impl_generics = generics.clone();
-        let token_arg: GenericParam = parse_quote_spanned! {Span::mixed_site()=>
+        let token_arg: GenericParam = parse_quote! {
             __YewToken
         };
         push_type_param(&mut assert_impl_generics, token_arg.clone());

@@ -1,5 +1,5 @@
 use proc_macro2::TokenStream;
-use quote::{quote_spanned, ToTokens};
+use quote::{quote, ToTokens};
 use syn::buffer::Cursor;
 use syn::parse::{Parse, ParseStream};
 use syn::spanned::Spanned;
@@ -70,17 +70,17 @@ impl Parse for HtmlIf {
 impl ToTokens for HtmlIf {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let Self {
-            if_token,
             cond,
             then_branch,
             else_branch,
+            ..
         } = self;
         let default_else_branch = parse_quote! { {} };
         let else_branch = else_branch
             .as_ref()
             .map(|(_, branch)| branch)
             .unwrap_or(&default_else_branch);
-        let new_tokens = quote_spanned! {if_token.span()=>
+        let new_tokens = quote! {
             if #cond #then_branch else #else_branch
         };
 

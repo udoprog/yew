@@ -1,5 +1,5 @@
 use proc_macro2::TokenStream;
-use quote::{quote, quote_spanned, ToTokens};
+use quote::{quote, ToTokens};
 use syn::parse::{Parse, ParseStream};
 use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
@@ -23,7 +23,7 @@ impl ToTokens for Classes {
             ClassExpr::Lit(class) => quote! {
                 unsafe { __yew_classes.unchecked_push(#class) };
             },
-            ClassExpr::Expr(class) => quote_spanned! {class.span()=>
+            ClassExpr::Expr(class) => quote! {
                 __yew_classes.push(#class);
             },
         });

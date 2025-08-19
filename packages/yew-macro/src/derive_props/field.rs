@@ -2,9 +2,8 @@ use std::cmp::{Ord, Ordering, PartialEq, PartialOrd};
 use std::convert::TryFrom;
 
 use proc_macro2::{Ident, Span};
-use quote::{format_ident, quote, quote_spanned};
+use quote::{format_ident, quote};
 use syn::parse::Result;
-use syn::spanned::Spanned;
 use syn::{parse_quote, Attribute, Error, Expr, Field, GenericParam, Generics, Type, Visibility};
 
 use super::should_preserve_attr;
@@ -79,12 +78,12 @@ impl PropField {
                 }
             }
             PropAttr::PropOr(value) => {
-                quote_spanned! {value.span()=>
+                quote! {
                     #name: ::std::option::Option::unwrap_or(this.wrapped.#name, #value),
                 }
             }
             PropAttr::PropOrElse(func) => {
-                quote_spanned! {func.span()=>
+                quote! {
                     #name: ::std::option::Option::unwrap_or_else(this.wrapped.#name, #func),
                 }
             }
@@ -129,6 +128,7 @@ impl PropField {
         props_name: &Ident,
     ) -> proc_macro2::TokenStream {
         let Self { name, ty, attr, .. } = self;
+
         let token_ty = Ident::new("__YewTokenTy", Span::mixed_site());
         let build_fn = match attr {
             PropAttr::Required { wrapped_name } => {
@@ -186,7 +186,7 @@ impl PropField {
             }
         } else {
             let ident = named_field.ident.as_ref().unwrap();
-            let wrapped_name = format_ident!("{}_wrapper", ident, span = Span::mixed_site());
+            let wrapped_name = format_ident!("{}_wrapper", ident, span = ident.span());
             Ok(PropAttr::Required { wrapped_name })
         }
     }

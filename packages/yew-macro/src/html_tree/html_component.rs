@@ -1,5 +1,5 @@
 use proc_macro2::Span;
-use quote::{quote, quote_spanned, ToTokens};
+use quote::{quote, ToTokens};
 use syn::parse::discouraged::Speculative;
 use syn::parse::{Parse, ParseStream};
 use syn::spanned::Spanned;
@@ -131,8 +131,7 @@ impl ToTokens for HtmlComponent {
             close,
         } = self;
 
-        let ty_span = ty.span().resolved_at(Span::call_site());
-        let props_ty = quote_spanned!(ty_span=> <#ty as ::yew::html::BaseComponent>::Properties);
+        let props_ty = quote!(<#ty as ::yew::html::BaseComponent>::Properties);
         let children_renderer = children.to_children_renderer_tokens();
         let build_props = props.build_properties_tokens(&props_ty, children_renderer);
         let key = props.special().wrap_key_attr();
@@ -140,13 +139,13 @@ impl ToTokens for HtmlComponent {
             .as_ref()
             .map(|close| {
                 let close_ty = &close.ty;
-                quote_spanned! {close_ty.span()=>
+                quote! {
                     let _ = |_:#close_ty| {};
                 }
             })
             .unwrap_or_default();
 
-        tokens.extend(quote_spanned! {ty_span=>
+        tokens.extend(quote! {
             {
                 #use_close_tag
                 #[allow(clippy::let_unit_value)]

@@ -1,10 +1,9 @@
 use std::convert::TryFrom;
 use std::ops::{Deref, DerefMut};
 
-use proc_macro2::{Spacing, Span, TokenStream, TokenTree};
-use quote::{quote, quote_spanned};
+use proc_macro2::{Spacing, TokenStream, TokenTree};
+use quote::quote;
 use syn::parse::{Parse, ParseBuffer, ParseStream};
-use syn::spanned::Spanned;
 use syn::token::Brace;
 use syn::{braced, Block, Expr, ExprBlock, ExprMacro, ExprPath, ExprRange, Stmt, Token};
 
@@ -347,7 +346,7 @@ impl SpecialProps {
             .as_ref()
             .map(|attr| {
                 let value = &attr.value;
-                quote_spanned! {value.span().resolved_at(Span::call_site())=>
+                quote! {
                     ::yew::html::IntoPropValue::<::yew::html::NodeRef>
                     ::into_prop_value(#value)
                 }
@@ -360,7 +359,7 @@ impl SpecialProps {
             .as_ref()
             .map(|attr| {
                 let value = attr.value.optimize_literals();
-                quote_spanned! {value.span().resolved_at(Span::call_site())=>
+                quote! {
                     ::std::option::Option::Some(
                         ::std::convert::Into::<::yew::virtual_dom::Key>::into(#value)
                     )

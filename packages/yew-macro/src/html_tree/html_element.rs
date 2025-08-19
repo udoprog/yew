@@ -1,6 +1,6 @@
 use proc_macro2::{Delimiter, Group, Span, TokenStream};
 use proc_macro_error::emit_warning;
-use quote::{quote, quote_spanned, ToTokens};
+use quote::{quote, ToTokens};
 use syn::buffer::Cursor;
 use syn::parse::{Parse, ParseStream};
 use syn::spanned::Spanned;
@@ -230,22 +230,20 @@ impl ToTokens for HtmlElement {
                                 } else {
                                     return None;
                                 }),
-                                _ => Value::Dynamic(quote_spanned! {value.span()=> {
+                                _ => Value::Dynamic(quote! {{
                                     ::yew::utils::__ensure_type::<::std::primitive::bool>(#value);
                                     #key
                                 }}),
                             },
-                            expr => Value::Dynamic(
-                                quote_spanned! {expr.span().resolved_at(Span::call_site())=>
-                                    if #expr {
-                                        ::std::option::Option::Some(
-                                            ::yew::virtual_dom::AttrValue::Static(#key)
-                                        )
-                                    } else {
-                                        ::std::option::Option::None
-                                    }
-                                },
-                            ),
+                            expr => Value::Dynamic(quote! {
+                                if #expr {
+                                    ::std::option::Option::Some(
+                                        ::yew::virtual_dom::AttrValue::Static(#key)
+                                    )
+                                } else {
+                                    ::std::option::Option::None
+                                }
+                            }),
                         },
                         *directive,
                     ))
@@ -298,8 +296,8 @@ impl ToTokens for HtmlElement {
                         Value::Dynamic(_) => return None,
                     };
                     let v = match directive {
-                        Some(PropDirective::ApplyAsProperty(token)) => {
-                            quote_spanned!(token.span()=> ::yew::virtual_dom::AttributeOrProperty::Property(
+                        Some(PropDirective::ApplyAsProperty(..)) => {
+                            quote!(::yew::virtual_dom::AttributeOrProperty::Property(
                                 ::std::convert::Into::into(#v)
                             ))
                         }
@@ -321,8 +319,8 @@ impl ToTokens for HtmlElement {
                 let keys = attrs.iter().map(|(k, ..)| quote! { #k });
                 let values = attrs.iter().map(|(_, v, directive)| {
                     let value = match directive {
-                        Some(PropDirective::ApplyAsProperty(token)) => {
-                            quote_spanned!(token.span()=> ::std::option::Option::Some(
+                        Some(PropDirective::ApplyAsProperty(..)) => {
+                            quote!(::std::option::Option::Some(
                                 ::yew::virtual_dom::AttributeOrProperty::Property(
                                     ::std::convert::Into::into(#v)
                                 ))
@@ -430,14 +428,11 @@ impl ToTokens for HtmlElement {
                 };
                 // the return value can be inlined without the braces when this is stable:
                 // https://github.com/rust-lang/rust/issues/15701
-                quote_spanned!{
-                    name_span =>
-                    {
-                        #[allow(clippy::redundant_clone, unused_braces)]
-                        let node = #node;
-                        node
-                    }
-                }
+                quote!{{
+                    #[allow(clippy::redundant_clone, unused_braces)]
+                    let node = #node;
+                    node
+                }}
             }
             TagName::Expr(name) => {
                 let vtag = Ident::new("__yew_vtag", name.span());
@@ -449,7 +444,7 @@ impl ToTokens for HtmlElement {
                 // handle special attribute value
                 let handle_value_attr = props.value.as_ref().map(|prop| {
                     let v = prop.value.optimize_literals();
-                    quote_spanned! {v.span()=> {
+                    quote! {{
                         __yew_vtag.__macro_push_attr("value", #v);
                     }}
                 });
@@ -472,7 +467,7 @@ impl ToTokens for HtmlElement {
                 let defaultvalue = defaultvalue();
                 // this way we get a nice error message (with the correct span) when the expression
                 // doesn't return a valid value
-                quote_spanned! {expr.span()=> {
+                quote! {{
                     let mut #vtag_name = ::std::convert::Into::<
                         ::yew::virtual_dom::AttrValue
                     >::into(#expr);
@@ -547,7 +542,7 @@ impl ToTokens for HtmlElement {
 }
 
 fn wrap_attr_value<T: ToTokens>(value: T) -> TokenStream {
-    quote_spanned! {value.span()=>
+    quote! {
         ::yew::html::IntoPropValue::<
             ::std::option::Option<
                 ::yew::virtual_dom::AttrValue
